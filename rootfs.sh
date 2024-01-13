@@ -1,9 +1,12 @@
 #!/bin/bash
+#Dependencias 
 #repo 1 i386/amd64
 #repo 2 armhf/arm64
 repo1=http://es.archive.ubuntu.com/ubuntu/
 repo2=http://ports.ubuntu.com/ubuntu-ports/
-#Dependencias 
+repo_deb=http://deb.debian.org/debian
+repo_variant="main restricted universe multiverse"
+repo_vardeb="main contrib non-free non-free-firmware"
 dep() {
 	apt install debootstrap qemu-user-static
 }
@@ -23,10 +26,6 @@ qemu_x86_64(){
 	cp /usr/bin/qemu-x86_64-static /$imagen/usr/bin
 	chroot /$imagen /usr/bin/qemu-x86_64-static /bin/sh -i ./home/config.sh
 }
-
-qemu_armhf="cp /usr/bin/qemu-arm-static /$imagen/usr/bin"
-repo_variant="main restricted universe multiverse"
-clear
 registro() {
 echo $imagen > container.reg
 }
@@ -63,9 +62,12 @@ os_debian() {
     read debian
 
     case $debian in
-        1) imagen=buster;;
-        2) imagen=bullseye;;
-        3) imagen=bookworm;;
+        1) imagen=buster
+	origin=$repo_deb;;
+        2) imagen=bullseye
+	origin=$repo_deb;;
+        3) imagen=bookworm
+	origin=$repo_deb;;
         4) os_seleccion;;
         5) exit;;
         *) echo "Opcion no valida";;
@@ -161,26 +163,43 @@ chmod 777 $imagen.img
 mount -o loop $imagen.img /$imagen
 debootstrap  --arch=$cpu --foreign $imagen /$imagen $origin
     case $imagen in
+        buster)
+        repos="deb [arch=$cpu] $repo_deb buster $repo_vardeb
+deb [arch=$cpu] $repo_deb  buster-security $repo_vardeb
+deb [arch=$cpu] $repo_deb  buster-updates $repo_vardeb" ;;
+
+        bullseye)
+        repos="deb [arch=$cpu] $repo_deb bullseye $repo_vardeb
+deb [arch=$cpu] $repo_deb bullseye-security $repo_vardeb
+deb [arch=$cpu] $repo_deb bullseye-updates $repo_vardeb" ;;
+
+        bookworm)
+        repos="deb [arch=$cpu] $repo_deb bookworm $repo_vardeb
+deb [arch=$cpu] $repo_deb bookworm-security $repo_vardeb
+deb [arch=$cpu] $repo_deb bookworm-updates $repo_vardeb" ;;
+
         trusty)
-            repos="deb [arch=$cpu] $origin $repo_variant
+        repos="deb [arch=$cpu] $origin trusty $repo_variant
 deb [arch=$cpu] $origin trusty-security $repo_variant
 deb [arch=$cpu] $origin trusty-updates $repo_variant";;
+
         xenial)
-repos="deb [arch=$cpu] $origin xenial $repo_variant
+        repos="deb [arch=$cpu] $origin xenial $repo_variant
 deb [arch=$cpu] $origin xenial-security $repo_variant
 deb [arch=$cpu] $origin xenial-updates $repo_variant";;
+
         bionic)
-            repos="deb [arch=$cpu] $origin bionic $repo_variant
-	    deb [arch=$cpu] $origin bionic-security $repo_variant
-            deb [arch=$cpu] $origin bionic-updates $repo_variant";;
+        repos="deb [arch=$cpu] $origin bionic $repo_variant
+deb [arch=$cpu] $origin bionic-security $repo_variant
+deb [arch=$cpu] $origin bionic-updates $repo_variant";;
+
         focal)
-            repos="deb [arch=$cpu] $origin focal $repo_variant
-                   deb [arch=$cpu] $origin focal-security $repo_variant
-                   deb [arch=$cpu] $origin focal-updates $repo_variant"
-            ;;
+        repos="deb [arch=$cpu] $origin focal $repo_variant
+deb [arch=$cpu] $origin focal-security $repo_variant
+deb [arch=$cpu] $origin focal-updates $repo_variant";;
+
         kali-rolling)
-            repos="deb [arch=$cpu] $origin kali-rolling main contrib non-free non-free-firmware"
-            ;;
+            repos="deb [arch=$cpu] $origin kali-rolling main contrib non-free non-free-firmware";;
         *)
             echo "Repositorios no definidos para $imagen"; exit 1 ;;
     esac
@@ -253,6 +272,5 @@ disco_tamano
 creacion_imagen
 dep
 montaje
-
 parte_final
 
