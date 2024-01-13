@@ -244,8 +244,8 @@ apt-get clean
 read -p "Introduzca usuario: " usuario
 adduser $usuario
 addgroup $usuario sudo
-addgroup $imagen adm
-addgroup $imagen users
+addgroup $usuario adm
+addgroup $usuario users
 +
 }
 montaje() {
