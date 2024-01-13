@@ -1,5 +1,5 @@
 #!/bin/sh
-
+chmod +x rootfs.sh
 menu_principal() {
 	clear
 echo "Seleccione una opción"
@@ -16,7 +16,7 @@ esac
 menu_crear() {
 	clear
         echo "1. Crear contenedor desde iso"
-        echo "2. Crear contwnedor desde jaula"
+        echo "2. Crear contenedor desde jaula"
         echo "3. Atras"
         read crear
         case $crear in
