@@ -7,6 +7,25 @@ repo2=http://ports.ubuntu.com/ubuntu-ports/
 dep() {
 	apt install debootstrap qemu-user-static
 }
+qemu_arm64(){ 
+	cp /usr/bin/qemu-aarch64-static /$imagen/usr/bin
+	chroot /$imagen /usr/bin/qemu-aarch64-static /bin/sh -i ./home/config.sh
+}
+qemu_arm(){ 
+	cp /usr/bin/qemu-arm-static /$imagen/usr/bin
+	chroot /$imagen /usr/bin/qemu-arm-static /bin/sh -i ./home/config.sh
+}
+qemu_i386(){ 
+	cp /usr/bin/qemu-i386-static /$imagen/usr/bin
+	chroot /$imagen /usr/bin/qemu-i386-static /bin/sh -i ./home/config.sh
+}
+qemu_x86_64(){ 
+	cp /usr/bin/qemu-x86_64-static /$imagen/usr/bin
+	chroot /$imagen /usr/bin/qemu-x86_64-static /bin/sh -i ./home/config.sh
+}
+
+qemu_armhf="cp /usr/bin/qemu-arm-static /$imagen/usr/bin"
+repo_variant="main restricted universe multiverse"
 clear
 registro() {
 echo $imagen > container.reg
@@ -16,18 +35,18 @@ clear
         echo "Selecciona arquitectura"
         echo "1. Armhf"
         echo "2. Arm64"
-        echo "3. i366"
+        echo "3. i386"
         echo "4. x86_64"
         echo "Atras"
         read archi
         case $archi in
-                1)cpu="arch=armhf"
+                1)cpu=armhf
                         origin=$repo2;;
-                2)cpu=arch=arm64
+                2)cpu=arm64
                         origin=$repo2;;
-                3)cpu=arch=i386
+                3)cpu=i386
                         origin=$repo1;;
-                4)cpu=arch=amd64
+                4)cpu=amd64
                         origin=$repo1;;
                 5);;
         esac
@@ -140,28 +159,27 @@ dd if=/dev/zero of=$imagen.img bs=1 count=0 seek=$disco
 mkfs.ext4 $imagen.img
 chmod 777 $imagen.img
 mount -o loop $imagen.img /$imagen
-debootstrap  --$cpu --foreign $imagen /$imagen $origin
+debootstrap  --arch=$cpu --foreign $imagen /$imagen $origin
     case $imagen in
         trusty)
-            repos="deb [$cpu] $origin trusty main restricted universe multiverse
-deb $cpu $origin trusty-security main restricted universe multiverse
-deb $cpu $origin trusty-updates main restricted universe multiverse"
-            ;;
+            repos="deb [arch=$cpu] $origin $repo_variant
+deb [arch=$cpu] $origin trusty-security $repo_variant
+deb [arch=$cpu] $origin trusty-updates $repo_variant";;
         xenial)
-            repos="deb $cpu $origin xenial main restricted universe multiverse
-deb $cpu $origin xenial-security main restricted universe multiverse
-deb $cpu $origin xenial-updates main restricted universe multiverse";;
+repos="deb [arch=$cpu] $origin xenial $repo_variant
+deb [arch=$cpu] $origin xenial-security $repo_variant
+deb [arch=$cpu] $origin xenial-updates $repo_variant";;
         bionic)
-            repos="deb $cpu $origin bionic main restricted universe multiverse
-deb $cpu $origin bionic-security main restricted universe multiverse
-deb $cpu $origin bionic-updates main restricted universe multiverse";;
+            repos="deb [arch=$cpu] $origin bionic $repo_variant
+	    deb [arch=$cpu] $origin bionic-security $repo_variant
+            deb [arch=$cpu] $origin bionic-updates $repo_variant";;
         focal)
-            repos="deb $cpu $origin focal main restricted universe multiverse
-                   deb $cpu $origin focal-security main restricted universe multiverse
-                   deb $cpu $origin focal-updates main restricted universe multiverse"
+            repos="deb [arch=$cpu] $origin focal $repo_variant
+                   deb [arch=$cpu] $origin focal-security $repo_variant
+                   deb [arch=$cpu] $origin focal-updates $repo_variant"
             ;;
         kali-rolling)
-            repos="deb $cpu $origin kali-rolling main contrib non-free non-free-firmware"
+            repos="deb [arch=$cpu] $origin kali-rolling main contrib non-free non-free-firmware"
             ;;
         *)
             echo "Repositorios no definidos para $imagen"; exit 1 ;;
@@ -169,27 +187,6 @@ deb $cpu $origin bionic-updates main restricted universe multiverse";;
 
     # Insertar líneas en /etc/apt/sources.list
     echo "$repos" > /$imagen/etc/apt/sources.list
-
-}
-montaje() {
-mount -o bind /dev /$imagen/dev
-mount -o bind /dev/pts /$imagen/dev/pts
-mount -t sysfs /sys /$imagen/sys
-mount -t proc /proc /$imagen/proc
-}
-parte_final() {
-chmod +x  config.sh
-cp  config.sh /$imagen/home
-chroot /$imagen /bin/sh -i ./home/config.sh
-rm config.sh
-exit
-}
-arquitectura
-os_seleccion
-disco_tamano
-creacion_imagen
-dep
-montaje
 > config.sh
 cat <<+ >> config.sh
 #!/bin/sh
@@ -231,4 +228,31 @@ addgroup $imagen sudo
 addgroup $imagen adm
 addgroup $imagen users
 +
+}
+montaje() {
+mount -o bind /dev /$imagen/dev
+mount -o bind /dev/pts /$imagen/dev/pts
+mount -t sysfs /sys /$imagen/sys
+mount -t proc /proc /$imagen/proc
+}
+parte_final() {
+chmod +x  config.sh
+cp  config.sh /$imagen/home
+case $cpu in
+	armhf) qemu_arm;;
+	arm64) qemu_arm64;;
+	i386) qemu_i386;;
+	amd64) qemu_x86_64;;
+esac
+
+rm config.sh
+}
+arquitectura
+os_seleccion
+disco_tamano
+creacion_imagen
+dep
+montaje
+
 parte_final
+
