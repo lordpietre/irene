@@ -6,7 +6,7 @@ repo1=http://es.archive.ubuntu.com/ubuntu/
 repo2=http://ports.ubuntu.com/ubuntu-ports/
 repo_deb=http://deb.debian.org/debian
 repo_variant="main restricted universe multiverse"
-repo_vardeb="main contrib non-free non-free-firmware"
+repo_vardeb="main contrib non-free"
 dep() {
 	apt install debootstrap qemu-user-static
 }
@@ -239,11 +239,11 @@ dpkg-reconfigure locales
 dpkg-reconfigure -f noninteractive tzdata
 apt-get upgrade -y
 hostnamectl set-hostname $imagen
-sudo apt install ubuntu-minimal  -y
 apt-get -f install
 apt-get clean
-adduser $imagen
-addgroup $imagen sudo
+read -p "Introduzca usuario: " usuario
+adduser $usuario
+addgroup $usuario sudo
 addgroup $imagen adm
 addgroup $imagen users
 +
