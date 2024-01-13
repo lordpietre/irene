@@ -1,6 +1,7 @@
 #!/bin/sh
 
 menu_principal() {
+	clear
 echo "Seleccione una opción"
 echo "1. Crear contenedor"
 echo "2. Lanzar contenedor"
@@ -13,6 +14,7 @@ case $menu in
 esac
 }
 menu_crear() {
+	clear
         echo "1. Crear contenedor desde iso"
         echo "2. Crear contwnedor desde jaula"
         echo "3. Atras"
@@ -24,6 +26,7 @@ menu_crear() {
 esac
 }
 menu_lanzar () {
+	clear
         echo "1. Con qemu (rootfs+kernel)"
         echo "2. chroot (solo rootfs)"
         echo "3. Atras"
