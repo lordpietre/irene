@@ -1,12 +1,15 @@
 #!/bin/bash
+
 #Dependencias 
 #repo 1 i386/amd64
 #repo 2 armhf/arm64
 repo1=http://es.archive.ubuntu.com/ubuntu/
 repo2=http://ports.ubuntu.com/ubuntu-ports/
 repo_deb=http://deb.debian.org/debian
+repo_debold=http://archive.debian.org/debian/
 repo_variant="main restricted universe multiverse"
 repo_vardeb="main contrib non-free"
+repo_varkali="main contrib non-free non-free-firmware"
 dep() {
 	apt install debootstrap qemu-user-static
 }
@@ -56,8 +59,12 @@ os_debian() {
     echo "1. Debian 10 Buster"
     echo "2. Debian 11 Bullseye"
     echo "3. Debian 12 bookworm"
-    echo "4. Atras"
-    echo "5. salir"
+    echo "4. Debian 9 stretch"
+    echo "5  Debian 8 jessie"
+    echo "6  Debian 7 Wheezy"
+    echo "7  Debian 6 Squeeze"
+    echo "8. Atras"
+    echo "9. salir"
     echo -n " Selecciona una opción [1-5]"
     read debian
 
@@ -68,8 +75,16 @@ os_debian() {
 	origin=$repo_deb;;
         3) imagen=bookworm
 	origin=$repo_deb;;
-        4) os_seleccion;;
-        5) exit;;
+	4) imagen=stretch
+	origin=$repo_debold;;
+	5) imagen=jessie
+	origin=$repo_debold;;
+	6) imagen=wheezy
+	origin=$repo_debold;;
+	7) imagen=squeeze
+	origin=$repo_debold;;
+        8) os_seleccion;;
+        9) exit;;
         *) echo "Opcion no valida";;
     esac
 }
@@ -105,15 +120,19 @@ os_kali () {
         clear
         echo "Kali Linux"
         echo "1. Rolling"
-        echo "2. Atrás"
-        echo "3. Salir"
+	echo "2. Main"
+        echo "3. Atrás"
+        echo "4. Salir"
         read kali
         case $kali in
         1) imagen=kali-rolling
                 echo $imagen > container.reg
         origin=http://http.kali.org/kali;;
-        2) os_seleccion;;
-        3) exit;;
+	2) imagen=kali-last-snapshot
+		echo $imagen > container.reg
+		origin=http://http.kali.org/kali;;
+	3) os_seleccion;;
+        4) exit;;
         esac
 }
 os_seleccion() {
@@ -122,36 +141,42 @@ clear
         echo "1. Ubuntu"
         echo "2. Debian"
         echo "3. Kali"
-        echo "4. Salir"
+	echo "4. Atras"
+        echo "5. Salir"
         echo -n " Selecciona una opción [1-3]"
         read OS
         case $OS in
         1) os_ubuntu;;
         2) os_debian;;
         3) os_kali;;
-        4) exit;;
+        4) arquitectura;;
+	5) exit;;
         *) echo "Opcion no valida";;
 esac
 }
 disco_tamano() {
 clear
-echo "Tamaño del disco"
-echo "1. 1 Gb"
-echo "2. 2 Gb"
-echo "3. 4 Gb"
-echo "4. 8 Gb"
-echo "5. 16 Gb"
-echo "6. 32 Gb"
-echo "7. Inicio"
+echo "Selecione el Tamaño del disco"
+echo "1. 512 Mb"
+echo "2. 1 Gb"
+echo "3. 2 Gb"
+echo "4. 4 Gb"
+echo "5. 8 Gb"
+echo "6. 16 Gb"
+echo "7. 32 Gb"
+echo "8. 64 Gb"
+echo -n " Selecciona una opción [1-7]"
 read disk
 case $disk in
-1) disco=1024M;;
-2) disco=2048M;;
-3) disco=4096M;;
-4) disco=8192M;;
-5) disco=16000M;;
-6) disco=32000M;;
-7) os_seleccion;;
+1) disco=512M;;
+2) disco=1024M;;
+3) disco=2048M;;
+4) disco=4096M;;
+5) disco=8192M;;
+6) disco=16000M;;
+7) disco=32000M;;
+8) disco=64000M;;
+9) os_seleccion;;
 *) echo "Incorrecto"
 esac
 }
@@ -177,7 +202,10 @@ deb [arch=$cpu] $repo_deb bullseye-updates $repo_vardeb" ;;
         repos="deb [arch=$cpu] $repo_deb bookworm $repo_vardeb
 deb [arch=$cpu] $repo_deb bookworm-security $repo_vardeb
 deb [arch=$cpu] $repo_deb bookworm-updates $repo_vardeb" ;;
-
+	stretch)
+	repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+	deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
+	deb [arch=$cpu] $repo_debold stretch-updates $repo_vardeb";;
         trusty)
         repos="deb [arch=$cpu] $origin trusty $repo_variant
 deb [arch=$cpu] $origin trusty-security $repo_variant
@@ -199,13 +227,17 @@ deb [arch=$cpu] $origin focal-security $repo_variant
 deb [arch=$cpu] $origin focal-updates $repo_variant";;
 
         kali-rolling)
-            repos="deb [arch=$cpu] $origin kali-rolling main contrib non-free non-free-firmware";;
-        *)
-            echo "Repositorios no definidos para $imagen"; exit 1 ;;
+            repos="deb [arch=$cpu] $origin kali-rolling $repo_varkali";;
+	    
+	kali-last-snapshot) repos="deb [arch=$cpu] $origin kali-last-snapshot $repo_varkali";;
+    		   *)
+	echo "Repositorios no definidos para $imagen"; exit 1 ;;
     esac
 
     # Insertar líneas en /etc/apt/sources.list
     echo "$repos" > /$imagen/etc/apt/sources.list
+
+# aquí se crea el script que se ejecuta dento del contenedor
 > config.sh
 cat <<+ >> config.sh
 #!/bin/sh
@@ -230,7 +262,6 @@ echo "tmpfs    /tmp        tmpfs    nodev,nosuid,mode=1777 0 0" >> /etc/fstab
 echo "tmpfs    /var/tmp    tmpfs    defaults    0 0" >> /etc/fstab
 $repos
 apt update
-apt install openssl ca-certificates apt-transport-https locales locale-gen
 echo "Reconfigurando parametros locales"
 locale-gen es_ES.UTF-8
 export LC_ALL="es_ES.UTF-8"
@@ -273,4 +304,3 @@ creacion_imagen
 dep
 montaje
 parte_final
-
