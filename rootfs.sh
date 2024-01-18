@@ -7,6 +7,7 @@ repo1=http://es.archive.ubuntu.com/ubuntu/
 repo2=http://ports.ubuntu.com/ubuntu-ports/
 repo_deb=http://deb.debian.org/debian
 repo_debold=http://archive.debian.org/debian/
+repo_kali=http://http.kali.org/kali
 repo_variant="main restricted universe multiverse"
 repo_vardeb="main contrib non-free"
 repo_varkali="main contrib non-free non-free-firmware"
@@ -38,7 +39,7 @@ clear
         echo "1. Armhf"
         echo "2. Arm64"
         echo "3. i386"
-        echo "4. x86_64"
+        echo "4. Amd 64"
         echo "Atras"
         read archi
         case $archi in
@@ -96,23 +97,28 @@ clear
         echo "3. Bionic"
         echo "4. Focal"
         echo "5. Jammy"
-        echo "6. Atras"
-        echo "7. Salir"
+	echo "6. Noble"
+        echo "7. Atras"
+        echo "8. Salir"
         echo -n " Selecciona una opción [1-7]"
         read ubuntu
         case $ubuntu in
                 1) imagen=trusty
-                   registro;;
+                   	registro;;
                 2) imagen=xenial
-                   registro;;
+                   	registro;;
                 3) imagen=bionic
                         registro;;
                 4) imagen=focal
                         registro;;
                 5) imagen=jammy
                         registro;;
-                6) os_seleccion;;
-                7) exit;;
+		6) imagen=noble
+			registro;;
+                7) os_seleccion;;
+
+                8) exit;;
+
                 *) echo "Opcion no valida";;
         esac
 }
@@ -126,11 +132,11 @@ os_kali () {
         read kali
         case $kali in
         1) imagen=kali-rolling
-                echo $imagen > container.reg
-        origin=http://http.kali.org/kali;;
+                echo $imagen >> container.reg
+        origin=$repo_varkali;;
 	2) imagen=kali-last-snapshot
-		echo $imagen > container.reg
-		origin=http://http.kali.org/kali;;
+		echo $imagen >> container.reg
+		origin=$repo_varkali;;
 	3) os_seleccion;;
         4) exit;;
         esac
@@ -189,9 +195,9 @@ mount -o loop $imagen.img /$imagen
 debootstrap  --arch=$cpu --foreign $imagen /$imagen $origin
     case $imagen in
         buster)
-        repos="deb [arch=$cpu] $repo_deb buster $repo_vardeb
-deb [arch=$cpu] $repo_deb  buster-security $repo_vardeb
-deb [arch=$cpu] $repo_deb  buster-updates $repo_vardeb" ;;
+        repos="deb [arch=$cpu] $repo_deb $imagen $repo_vardeb
+deb [arch=$cpu] $repo_deb $imagen-security $repo_vardeb
+deb [arch=$cpu] $repo_deb $imagen-updates $repo_vardeb" ;;
 
         bullseye)
         repos="deb [arch=$cpu] $repo_deb bullseye $repo_vardeb
@@ -202,11 +208,23 @@ deb [arch=$cpu] $repo_deb bullseye-updates $repo_vardeb" ;;
         repos="deb [arch=$cpu] $repo_deb bookworm $repo_vardeb
 deb [arch=$cpu] $repo_deb bookworm-security $repo_vardeb
 deb [arch=$cpu] $repo_deb bookworm-updates $repo_vardeb" ;;
+
 	stretch)
 	repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
-	deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
-	deb [arch=$cpu] $repo_debold stretch-updates $repo_vardeb";;
-        trusty)
+deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
+deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
+	
+	jessie)
+	repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
+deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
+	
+	wheezy)
+	repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
+deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
+
+	trusty)
         repos="deb [arch=$cpu] $origin trusty $repo_variant
 deb [arch=$cpu] $origin trusty-security $repo_variant
 deb [arch=$cpu] $origin trusty-updates $repo_variant";;
@@ -223,16 +241,21 @@ deb [arch=$cpu] $origin bionic-updates $repo_variant";;
 
         focal)
         repos="deb [arch=$cpu] $origin focal $repo_variant
-deb [arch=$cpu] $origin focal-security $repo_variant
-deb [arch=$cpu] $origin focal-updates $repo_variant";;
+deb [arch=$cpu] $origin $imagen-security $repo_variant
+deb [arch=$cpu] $origin $imagen-updates $repo_variant";;
 
-        kali-rolling)
-            repos="deb [arch=$cpu] $origin kali-rolling $repo_varkali";;
+
+	noble)
+	repos="deb [arch=$cpu] $origin focal $repo_variant
+deb [arch=$cpu] $origin $imagen-security $repo_variant
+deb [arch=$cpu] $origin $imagen-updates $repo_variant";;	
+
+	kali-rolling)
+        repos="deb [arch=$cpu] $origin $imagen $repo_varkali";;
 	    
-	kali-last-snapshot) repos="deb [arch=$cpu] $origin kali-last-snapshot $repo_varkali";;
-    		   *)
-	echo "Repositorios no definidos para $imagen"; exit 1 ;;
-    esac
+	kali-last-snapshot) repos="deb [arch=$cpu] $origin $imagen $repo_varkali";;
+    		   *) echo "Repositorios no definidos para $imagen"; exit 1 ;;
+esac
 
     # Insertar líneas en /etc/apt/sources.list
     echo "$repos" > /$imagen/etc/apt/sources.list
