@@ -10,28 +10,28 @@ repo_debold=http://archive.debian.org/debian/
 repo_kali=http://http.kali.org/kali
 repo_variant="main restricted universe multiverse"
 repo_vardeb="main contrib non-free"
-repo_varkali="main contrib non-free non-free-firmware"
+repo_varkali="non-free non-free-firmware"
 dep() {
 	apt install debootstrap qemu-user-static
 }
 qemu_arm64(){ 
-	cp /usr/bin/qemu-aarch64-static /$imagen/usr/bin
-	chroot /$imagen /usr/bin/qemu-aarch64-static /bin/sh -i ./home/config.sh
+	cp /usr/bin/qemu-aarch64-static /$nameiso/usr/bin
+	chroot /$nameiso /usr/bin/qemu-aarch64-static /bin/sh -i ./home/config.sh
 }
 qemu_arm(){ 
-	cp /usr/bin/qemu-arm-static /$imagen/usr/bin
-	chroot /$imagen /usr/bin/qemu-arm-static /bin/sh -i ./home/config.sh
+	cp /usr/bin/qemu-arm-static /$nameiso/usr/bin
+	chroot /$nameiso /usr/bin/qemu-arm-static /bin/sh -i ./home/config.sh
 }
 qemu_i386(){ 
-	cp /usr/bin/qemu-i386-static /$imagen/usr/bin
-	chroot /$imagen /usr/bin/qemu-i386-static /bin/sh -i ./home/config.sh
+	cp /usr/bin/qemu-i386-static /$nameiso/usr/bin
+	chroot /$nameiso /usr/bin/qemu-i386-static /bin/sh -i ./home/config.sh
 }
 qemu_x86_64(){ 
-	cp /usr/bin/qemu-x86_64-static /$imagen/usr/bin
-	chroot /$imagen /usr/bin/qemu-x86_64-static /bin/sh -i ./home/config.sh
+	cp /usr/bin/qemu-x86_64-static /$nameiso/usr/bin
+	chroot /$nameiso /usr/bin/qemu-x86_64-static /bin/sh -i ./home/config.sh
 }
 registro() {
-echo $imagen > container.reg
+echo $nameiso > container.reg
 }
 arquitectura() {
 clear
@@ -103,22 +103,14 @@ clear
         echo -n " Selecciona una opción [1-7]"
         read ubuntu
         case $ubuntu in
-                1) imagen=trusty
-                   	registro;;
-                2) imagen=xenial
-                   	registro;;
-                3) imagen=bionic
-                        registro;;
-                4) imagen=focal
-                        registro;;
-                5) imagen=jammy
-                        registro;;
-		6) imagen=noble
-			registro;;
+                1) imagen=trusty;;
+                2) imagen=xenial;;
+                3) imagen=bionic;;
+                4) imagen=focal;;
+                5) imagen=jammy;;
+				6) imagen=noble;;
                 7) os_seleccion;;
-
                 8) exit;;
-
                 *) echo "Opcion no valida";;
         esac
 }
@@ -126,18 +118,16 @@ os_kali () {
         clear
         echo "Kali Linux"
         echo "1. Rolling"
-	echo "2. Main"
+		echo "2. Main"
         echo "3. Atrás"
         echo "4. Salir"
         read kali
         case $kali in
         1) imagen=kali-rolling
-                echo $imagen >> container.reg
-        origin=$repo_varkali;;
-	2) imagen=kali-last-snapshot
-		echo $imagen >> container.reg
-		origin=$repo_varkali;;
-	3) os_seleccion;;
+        origin=$repo_kali;;
+		2) imagen=kali-last-snapshot
+		origin=$repo_kali;;
+		3) os_seleccion;;
         4) exit;;
         esac
 }
@@ -175,24 +165,25 @@ echo -n " Selecciona una opción [1-7]"
 read disk
 case $disk in
 1) disco=512M;;
-2) disco=1024M;;
-3) disco=2048M;;
-4) disco=4096M;;
-5) disco=8192M;;
-6) disco=16000M;;
-7) disco=32000M;;
-8) disco=64000M;;
+2) disco=1G;;
+3) disco=2G;;
+4) disco=4G;;
+5) disco=8G;;
+6) disco=16G;;
+7) disco=32G;;
+8) disco=64G;;
 9) os_seleccion;;
 *) echo "Incorrecto"
 esac
 }
 creacion_imagen() {
-mkdir /$imagen
-dd if=/dev/zero of=$imagen.img bs=1 count=0 seek=$disco
-mkfs.ext4 $imagen.img
-chmod 777 $imagen.img
-mount -o loop $imagen.img /$imagen
-debootstrap  --arch=$cpu --foreign $imagen /$imagen $origin
+	nameiso=$imagen-$cpu-$disco
+mkdir /$nameiso
+dd if=/dev/zero of=$nameiso.img bs=1 count=0 seek=$disco
+mkfs.ext4 $nameiso.img
+chmod 777 $nameiso.img
+mount -o loop $nameiso.img /$nameiso
+debootstrap  --arch=$cpu --foreign $imagen /$nameiso $origin
     case $imagen in
         buster)
         repos="deb [arch=$cpu] $repo_deb $imagen $repo_vardeb
@@ -251,14 +242,14 @@ deb [arch=$cpu] $origin $imagen-security $repo_variant
 deb [arch=$cpu] $origin $imagen-updates $repo_variant";;	
 
 	kali-rolling)
-        repos="deb [arch=$cpu] $origin $imagen $repo_varkali";;
+    repos="deb [arch=$cpu] $origin kali-rolling $repo_varkali";;
 	    
-	kali-last-snapshot) repos="deb [arch=$cpu] $origin $imagen $repo_varkali";;
+	kali-last-snapshot) repos="deb [arch=$cpu] $origin kali-last-snapshot $repo_varkali";;
     		   *) echo "Repositorios no definidos para $imagen"; exit 1 ;;
 esac
 
     # Insertar líneas en /etc/apt/sources.list
-    echo "$repos" > /$imagen/etc/apt/sources.list
+    echo "$repos" > /$nameiso/etc/apt/sources.list
 
 # aquí se crea el script que se ejecuta dento del contenedor
 > config.sh
@@ -284,7 +275,8 @@ echo "/dev/mmcblk0p1 /     ext4     errors=remount-ro,noatime,nodiratime 0 1" >>
 echo "tmpfs    /tmp        tmpfs    nodev,nosuid,mode=1777 0 0" >> /etc/fstab
 echo "tmpfs    /var/tmp    tmpfs    defaults    0 0" >> /etc/fstab
 $repos
-apt update
+apt-get update
+apt-get install locales
 echo "Reconfigurando parametros locales"
 locale-gen es_ES.UTF-8
 export LC_ALL="es_ES.UTF-8"
@@ -303,14 +295,14 @@ addgroup $usuario users
 +
 }
 montaje() {
-mount -o bind /dev /$imagen/dev
-mount -o bind /dev/pts /$imagen/dev/pts
-mount -t sysfs /sys /$imagen/sys
-mount -t proc /proc /$imagen/proc
+mount -o bind /dev /$nameiso/dev
+mount -o bind /dev/pts /$nameiso/dev/pts
+mount -t sysfs /sys /$nameiso/sys
+mount -t proc /proc /$nameiso/proc
 }
 parte_final() {
 chmod +x  config.sh
-cp  config.sh /$imagen/home
+cp  config.sh /$nameiso/home
 case $cpu in
 	armhf) qemu_arm;;
 	arm64) qemu_arm64;;
@@ -323,7 +315,8 @@ rm config.sh
 arquitectura
 os_seleccion
 disco_tamano
-creacion_imagen
 dep
+creacion_imagen
 montaje
 parte_final
+
