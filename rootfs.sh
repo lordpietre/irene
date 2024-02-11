@@ -205,32 +205,32 @@ deb [arch=$cpu] $repo_deb $imagen-security $repo_vardeb
 deb [arch=$cpu] $repo_deb $imagen-updates $repo_vardeb" ;;
 
         bullseye)
-        repos="deb [arch=$cpu] $repo_deb bullseye $repo_vardeb
+        repos="deb [arch=$cpu] $repo_deb $imagen $repo_vardeb
 deb [arch=$cpu] $repo_deb bullseye-security $repo_vardeb
 deb [arch=$cpu] $repo_deb bullseye-updates $repo_vardeb" ;;
 
         bookworm)
-        repos="deb [arch=$cpu] $repo_deb bookworm $repo_vardeb
+        repos="deb [arch=$cpu] $repo_deb $imagen $repo_vardeb
 deb [arch=$cpu] $repo_deb bookworm-security $repo_vardeb
 deb [arch=$cpu] $repo_deb bookworm-updates $repo_vardeb" ;;
 
 		stretch)
-		repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+		repo="deb [arch=$cpu] $repo_debold $imagen $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
 	
 		jessie)
-		repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+		repo="deb [arch=$cpu] $repo_debold $imagen $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
 	
 		wheezy)
-		repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+		repo="deb [arch=$cpu] $repo_debold $imagen $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
 
 		lenny)
-		repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+		repo="deb [arch=$cpu] $repo_debold $imagen $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
 
