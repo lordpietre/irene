@@ -4,13 +4,13 @@
 #repo 1 i386/amd64
 #repo 2 armhf/arm64
 repo1=http://es.archive.ubuntu.com/ubuntu/
-repo2=http://ports.ubuntu.com/ubuntu-ports/
+repo2=https://old-releases.ubuntu.com/ubuntu
 repo_deb=http://deb.debian.org/debian
 repo_debold=http://archive.debian.org/debian/
 repo_kali=http://http.kali.org/kali
 repo_variant="main restricted universe multiverse"
 repo_vardeb="main contrib non-free"
-repo_varkali="non-free non-free-firmware"
+repo_varkali=" main contrib non-free non-free-firmware"
 dep() {
 	apt install debootstrap qemu-user-static
 }
@@ -57,34 +57,37 @@ clear
 os_debian() {
     clear
     echo "Debian"
-    echo "1. Debian 10 Buster"
+    echo "1. Debian 12 bookworm"
     echo "2. Debian 11 Bullseye"
-    echo "3. Debian 12 bookworm"
-    echo "4. Debian 9 stretch"
-    echo "5  Debian 8 jessie"
-    echo "6  Debian 7 Wheezy"
-    echo "7  Debian 6 Squeeze"
+    echo "3. Debian 10 Buster"
+    echo "4. Debian 9  Stretch"
+    echo "5  Debian 8  Jessie"
+    echo "6  Debian 7  Wheezy"
+    echo "7  Debian 6  Squeeze"
+    echo "8  Debian 5. Lenny"
     echo "8. Atras"
     echo "9. salir"
     echo -n " Selecciona una opción [1-5]"
     read debian
 
     case $debian in
-        1) imagen=buster
+        1) imagen=bookworm
 	origin=$repo_deb;;
         2) imagen=bullseye
 	origin=$repo_deb;;
-        3) imagen=bookworm
+        3) imagen=buster
 	origin=$repo_deb;;
-	4) imagen=stretch
+		4) imagen=stretch
 	origin=$repo_debold;;
-	5) imagen=jessie
+		5) imagen=jessie
 	origin=$repo_debold;;
-	6) imagen=wheezy
+		6) imagen=wheezy
 	origin=$repo_debold;;
-	7) imagen=squeeze
+		7) imagen=squeeze
 	origin=$repo_debold;;
-        8) os_seleccion;;
+		8) imagen=lanny
+	origin=$repo_debold;;
+        9) os_seleccion;;
         9) exit;;
         *) echo "Opcion no valida";;
     esac
@@ -92,25 +95,33 @@ os_debian() {
 os_ubuntu() {
 clear
         echo "Ubuntu "
-        echo "1. Trusty"
-        echo "2. Xenial"
-        echo "3. Bionic"
-        echo "4. Focal"
-        echo "5. Jammy"
-	echo "6. Noble"
-        echo "7. Atras"
-        echo "8. Salir"
-        echo -n " Selecciona una opción [1-7]"
+        echo "1. Ubuntu 24.04 (Noble Numbat) "
+        echo "2. Ubuntu 23.04 (Lunar Lobster)"
+        echo "3. Ubuntu 23.10 (Mantic Minotaur)"
+        echo "4. Ubuntu 22.10 (Kinetic Kudu)"
+        echo "5. Ubuntu 22.04.3 LTS (Jammy Jellyfish)"
+        echo "6. Ubuntu 21.10 (Impish Indri)"
+        echo "7. Ubuntu 20.04.6 LTS (Focal Fossa)"
+        echo "8. Ubuntu 18.04.6 LTS (Bionic Beaver)"
+        echo "9. Ubuntu 16.04.7 LTS (Xenial Xerus)"
+		echo "10. Ubuntu 14.04.6 LTS (Trusty Tahr)"
+        echo "11. Atras"
+        echo "12. Salir"
+        echo -n " Selecciona una opción [1-11]"
         read ubuntu
         case $ubuntu in
-                1) imagen=trusty;;
-                2) imagen=xenial;;
-                3) imagen=bionic;;
-                4) imagen=focal;;
+                1) imagen=noble;;
+                2) imagen=lunar;;
+                3) imagen=mantic;;
+                4) imagen=kinetic;;
                 5) imagen=jammy;;
-				6) imagen=noble;;
-                7) os_seleccion;;
-                8) exit;;
+                5) imagen=impish;;
+                6) imagen=focal;;
+                7) imagen=bionic;;
+				8) imagen=xenial;;
+				9) imagen=trusty;;
+                10) os_seleccion;;
+                10) exit;;
                 *) echo "Opcion no valida";;
         esac
 }
@@ -185,6 +196,9 @@ chmod 777 $nameiso.img
 mount -o loop $nameiso.img /$nameiso
 debootstrap  --arch=$cpu --foreign $imagen /$nameiso $origin
     case $imagen in
+##### Repos de debian###
+
+
         buster)
         repos="deb [arch=$cpu] $repo_deb $imagen $repo_vardeb
 deb [arch=$cpu] $repo_deb $imagen-security $repo_vardeb
@@ -200,52 +214,81 @@ deb [arch=$cpu] $repo_deb bullseye-updates $repo_vardeb" ;;
 deb [arch=$cpu] $repo_deb bookworm-security $repo_vardeb
 deb [arch=$cpu] $repo_deb bookworm-updates $repo_vardeb" ;;
 
-	stretch)
-	repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+		stretch)
+		repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
 	
-	jessie)
-	repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+		jessie)
+		repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
 	
-	wheezy)
-	repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+		wheezy)
+		repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
 deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
 
-	trusty)
-        repos="deb [arch=$cpu] $origin trusty $repo_variant
-deb [arch=$cpu] $origin trusty-security $repo_variant
-deb [arch=$cpu] $origin trusty-updates $repo_variant";;
+		lenny)
+		repo="deb [arch=$cpu] $repo_debold stretch $repo_vardeb
+deb [arch=$cpu] $repo_debold stretch-security $repo_vardeb
+deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
 
-        xenial)
-        repos="deb [arch=$cpu] $origin xenial $repo_variant
-deb [arch=$cpu] $origin xenial-security $repo_variant
-deb [arch=$cpu] $origin xenial-updates $repo_variant";;
+##### Repos de ubuntu###
+		
+		noble)
+		repos="deb [arch=$cpu] $origin focal $repo_variant
+deb [arch=$cpu] $origin $imagen-security $repo_variant
+deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
+		
+		lunar)
+		repos="deb [arch=$cpu] $origin focal $repo_variant
+deb [arch=$cpu] $origin $imagen-security $repo_variant
+deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
+		mantic)
+		repos="deb [arch=$cpu] $origin focal $repo_variant
+deb [arch=$cpu] $origin $imagen-security $repo_variant
+deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
 
-        bionic)
-        repos="deb [arch=$cpu] $origin bionic $repo_variant
-deb [arch=$cpu] $origin bionic-security $repo_variant
-deb [arch=$cpu] $origin bionic-updates $repo_variant";;
+		kinetic)
+		repos="deb [arch=$cpu] $origin focal $repo_variant
+deb [arch=$cpu] $origin $imagen-security $repo_variant
+deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
+
+		jammy)
+        repos="deb [arch=$cpu] $origin focal $repo_variant
+deb [arch=$cpu] $origin $imagen-security $repo_variant
+deb [arch=$cpu] $origin $imagen-updates $repo_variant";;
 
         focal)
         repos="deb [arch=$cpu] $origin focal $repo_variant
 deb [arch=$cpu] $origin $imagen-security $repo_variant
 deb [arch=$cpu] $origin $imagen-updates $repo_variant";;
 
+        bionic)
+        repos="deb [arch=$cpu] $origin bionic $repo_variant
+deb [arch=$cpu] $origin bionic-security $repo_variant
+deb [arch=$cpu] $origin bionic-updates $repo_variant";;
 
-	noble)
-	repos="deb [arch=$cpu] $origin focal $repo_variant
-deb [arch=$cpu] $origin $imagen-security $repo_variant
-deb [arch=$cpu] $origin $imagen-updates $repo_variant";;	
+        xenial)
+        repos="deb [arch=$cpu] $origin xenial $repo_variant
+deb [arch=$cpu] $origin xenial-security $repo_variant
+deb [arch=$cpu] $origin xenial-updates $repo_variant";;
+		
+		trusty)
+        repos="deb [arch=$cpu] $origin trusty $repo_variant
+deb [arch=$cpu] $origin trusty-security $repo_variant
+deb [arch=$cpu] $origin trusty-updates $repo_variant";;	
 
-	kali-rolling)
-    repos="deb [arch=$cpu] $origin kali-rolling $repo_varkali";;
+##### Repos de kali###
+
+		kali-rolling)
+		repos="deb [arch=$cpu] $origin kali-rolling $repo_varkali";;
 	    
-	kali-last-snapshot) repos="deb [arch=$cpu] $origin kali-last-snapshot $repo_varkali";;
-    		   *) echo "Repositorios no definidos para $imagen"; exit 1 ;;
+		kali-last-snapshot) 
+		repos="deb [arch=$cpu] $origin kali-last-snapshot $repo_varkali";;
+    	
+    	*) echo "Repositorios no definidos para $imagen"; exit 1 ;;
 esac
 
     # Insertar líneas en /etc/apt/sources.list
