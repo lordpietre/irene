@@ -4,7 +4,8 @@
 #repo 1 i386/amd64
 #repo 2 armhf/arm64
 repo1=http://es.archive.ubuntu.com/ubuntu/
-repo2=https://old-releases.ubuntu.com/ubuntu
+repo2=http://ports.ubuntu.com/ubuntu-ports/
+repo3=https://old-releases.ubuntu.com/releases/
 repo_deb=http://deb.debian.org/debian
 repo_debold=http://archive.debian.org/debian/
 repo_kali=http://http.kali.org/kali
@@ -198,7 +199,6 @@ debootstrap  --arch=$cpu --foreign $imagen /$nameiso $origin
     case $imagen in
 ##### Repos de debian###
 
-
         buster)
         repos="deb [arch=$cpu] $repo_deb $imagen $repo_vardeb
 deb [arch=$cpu] $repo_deb $imagen-security $repo_vardeb
@@ -237,28 +237,34 @@ deb [arch=$cpu] $repo_debold stretch-updates $repo_varde";;
 ##### Repos de ubuntu###
 		
 		noble)
-		repos="deb [arch=$cpu] $origin focal $repo_variant
+		repos="deb [arch=$cpu] $origin noble $repo_variant
 deb [arch=$cpu] $origin $imagen-security $repo_variant
 deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
 		
 		lunar)
-		repos="deb [arch=$cpu] $origin focal $repo_variant
+		repos="deb [arch=$cpu] $origin lunar $repo_variant
 deb [arch=$cpu] $origin $imagen-security $repo_variant
-deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
+deb [arch=$cpu] $origin $imagen-updates $repo_variant";;	
+	
 		mantic)
-		repos="deb [arch=$cpu] $origin focal $repo_variant
+		repos="deb [arch=$cpu] $origin mantic $repo_variant
 deb [arch=$cpu] $origin $imagen-security $repo_variant
 deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
 
 		kinetic)
-		repos="deb [arch=$cpu] $origin focal $repo_variant
+		repos="deb [arch=$cpu] $origin kinetic $repo_variant
 deb [arch=$cpu] $origin $imagen-security $repo_variant
 deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
 
 		jammy)
-        repos="deb [arch=$cpu] $origin focal $repo_variant
+        repos="deb [arch=$cpu] $origin jammy $repo_variant
 deb [arch=$cpu] $origin $imagen-security $repo_variant
 deb [arch=$cpu] $origin $imagen-updates $repo_variant";;
+		
+		impish)
+        repos="deb [arch=$cpu] $repo3 impish $repo_variant
+deb [arch=$cpu] $repo3 $imagen-security $repo_variant
+deb [arch=$cpu] $repo3 $imagen-updates $repo_variant";;
 
         focal)
         repos="deb [arch=$cpu] $origin focal $repo_variant
@@ -330,7 +336,6 @@ apt-get upgrade -y
 hostnamectl set-hostname $imagen
 apt-get -f install
 apt-get clean
-read -p "Introduzca usuario: " usuario
 adduser $usuario
 addgroup $usuario sudo
 addgroup $usuario adm
