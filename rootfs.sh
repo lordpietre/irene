@@ -99,29 +99,25 @@ clear
         echo "1. Ubuntu 24.04 (Noble Numbat) "
         echo "2. Ubuntu 23.04 (Lunar Lobster)"
         echo "3. Ubuntu 23.10 (Mantic Minotaur)"
-        echo "4. Ubuntu 22.10 (Kinetic Kudu)"
-        echo "5. Ubuntu 22.04.3 LTS (Jammy Jellyfish)"
-        echo "6. Ubuntu 21.10 (Impish Indri)"
-        echo "7. Ubuntu 20.04.6 LTS (Focal Fossa)"
-        echo "8. Ubuntu 18.04.6 LTS (Bionic Beaver)"
-        echo "9. Ubuntu 16.04.7 LTS (Xenial Xerus)"
-		echo "10. Ubuntu 14.04.6 LTS (Trusty Tahr)"
-        echo "11. Atras"
-        echo "12. Salir"
+        echo "4. Ubuntu 22.04.3 LTS (Jammy Jellyfish)"
+        echo "5. Ubuntu 20.04.6 LTS (Focal Fossa)"
+        echo "6. Ubuntu 18.04.6 LTS (Bionic Beaver)"
+        echo "7. Ubuntu 16.04.7 LTS (Xenial Xerus)"
+	echo "8. Ubuntu 14.04.6 LTS (Trusty Tahr)"
+        echo "9. Atras"
+        echo "10. Salir"
         echo -n " Selecciona una opción [1-11]"
         read ubuntu
         case $ubuntu in
                 1) imagen=noble;;
                 2) imagen=lunar;;
                 3) imagen=mantic;;
-                4) imagen=kinetic;;
-                5) imagen=jammy;;
-                5) imagen=impish;;
-                6) imagen=focal;;
-                7) imagen=bionic;;
-				8) imagen=xenial;;
-				9) imagen=trusty;;
-                10) os_seleccion;;
+                4) imagen=jammy;;
+                5) imagen=focal;;
+                6) imagen=bionic;;
+                7) imagen=xenial;;
+                8) imagen=trusty;;
+                9) os_seleccion;;
                 10) exit;;
                 *) echo "Opcion no valida";;
         esac
@@ -251,20 +247,10 @@ deb [arch=$cpu] $origin $imagen-updates $repo_variant";;
 deb [arch=$cpu] $origin $imagen-security $repo_variant
 deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
 
-		kinetic)
-		repos="deb [arch=$cpu] $origin kinetic $repo_variant
-deb [arch=$cpu] $origin $imagen-security $repo_variant
-deb [arch=$cpu] $origin $imagen-updates $repo_variant";;		
-
 		jammy)
         repos="deb [arch=$cpu] $origin jammy $repo_variant
 deb [arch=$cpu] $origin $imagen-security $repo_variant
 deb [arch=$cpu] $origin $imagen-updates $repo_variant";;
-		
-		impish)
-        repos="deb [arch=$cpu] $repo3 impish $repo_variant
-deb [arch=$cpu] $repo3 $imagen-security $repo_variant
-deb [arch=$cpu] $repo3 $imagen-updates $repo_variant";;
 
         focal)
         repos="deb [arch=$cpu] $origin focal $repo_variant
@@ -367,4 +353,3 @@ dep
 creacion_imagen
 montaje
 parte_final
-
